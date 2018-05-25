@@ -1,10 +1,8 @@
 package behind47.com.coolweather.utils;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.icu.text.SimpleDateFormat;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
@@ -116,15 +114,17 @@ public class Utility {
      */
     public static void handleWeatherResponse(Context context, String response) {
         try {
+            // translate response into jsonObject
             JSONObject jsonObject = new JSONObject(response);
-            JSONObject weatherInfo = null;
-            weatherInfo = jsonObject.getJSONObject("weatherinfo");
+            JSONObject weatherInfo = jsonObject.getJSONObject("weatherinfo");
+            // resolve weather info from jsonObject
             String cityName = weatherInfo.getString("city");
-            String weatherCode = weatherInfo.getString("cityId");
+            String weatherCode = weatherInfo.getString("cityid");
             String temp1 = weatherInfo.getString("temp1");
             String temp2 = weatherInfo.getString("temp2");
             String weatherDesp = weatherInfo.getString("weather");
             String publishTime = weatherInfo.getString("ptime");
+            // save weather info
             saveWeatherInfo(context, cityName, weatherCode, temp1, temp2, weatherDesp, publishTime);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -132,7 +132,7 @@ public class Utility {
     }
 
     /**
-     * save weather info into SharedPreferences
+     * save weather info into SharedPreferences file
      *
      * @param context
      * @param cityName
@@ -142,19 +142,23 @@ public class Utility {
      * @param weatherDesp
      * @param publishTime
      */
-    @TargetApi(Build.VERSION_CODES.N)
     private static void saveWeatherInfo(Context context, String cityName, String weatherCode,
                                         String temp1, String temp2, String weatherDesp, String publishTime) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+
         editor.putBoolean("city_selected", true);
         editor.putString("city_name", cityName);
         editor.putString("weather_code", weatherCode);
-        editor.putString("temp1", temp1);
-        editor.putString("temp2", temp2);
+        editor.putString("min_temp", temp1);
+        editor.putString("max_temp", temp2);
         editor.putString("weather_desp", weatherDesp);
         editor.putString("publish_time", publishTime);
-        editor.putString("current_date", sdf.format(new Date()));
-        editor.commit();
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
+            editor.putString("current_date", sdf.format(new Date()));
+        }
+
+        editor.apply();
     }
 }
