@@ -62,13 +62,19 @@ public class ChooseAreaActivity extends Activity {
      * current selected level
      */
     private int mCurrentLevel;
+    /**
+     * if turned from WeatherActivity
+     */
+    private Boolean mIsFromWeatherActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mIsFromWeatherActivity = getIntent().getBooleanExtra("from_weather_activity", false);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (sharedPreferences.getBoolean("city_selected", false)) {
+        // if select city and not turned from WeatherActivity, then turn to WeatherActivity
+        if (sharedPreferences.getBoolean("city_selected", false) && !mIsFromWeatherActivity) {
             Intent intent = new Intent(this, WeatherActivity.class);
             startActivity(intent);
             finish();
@@ -246,6 +252,10 @@ public class ChooseAreaActivity extends Activity {
         } else if (mCurrentLevel == LEVEL_CITY) {
             queryProvinces();
         } else {
+            if (mIsFromWeatherActivity) {
+                Intent intent = new Intent(this, WeatherActivity.class);
+                startActivity(intent);
+            }
             finish();
         }
     }

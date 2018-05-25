@@ -1,12 +1,14 @@
 package behind47.com.coolweather.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -20,14 +22,34 @@ import behind47.com.coolweather.utils.Utility;
  */
 public class WeatherActivity extends Activity implements View.OnClickListener{
 
-
-    private TextView mCurrentDateText;
+    private LinearLayout mWeatherInfoLayout;
+    /**
+     * city name of weather info
+     */
+    private TextView mCityNameText;
+    /**
+     * publish time of weather info by api
+     */
+    private TextView mPublishText;
+    /**
+     * weather description
+     */
+    private TextView mWeatherDespText;
+    /**
+     * temperature range
+     */
     private TextView mMaxTempText;
     private TextView mMinTempText;
-    private TextView mWeatherDespText;
-    private TextView mPublishText;
-    private TextView mCityNameText;
-    private LinearLayout mWeatherInfoLayout;
+    /**
+     * current date
+     */
+    private TextView mCurrentDateText;
+
+    /**
+     * buttons used to refresh weather_info and turn to city-selecting page to switch city.
+     */
+    private Button mRefreshWeather;
+    private Button mSwitchCity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +63,13 @@ public class WeatherActivity extends Activity implements View.OnClickListener{
         mMinTempText = (TextView) findViewById(R.id.min_temp);
         mMaxTempText = (TextView) findViewById(R.id.max_temp);
         mCurrentDateText = (TextView) findViewById(R.id.current_date);
+
+        mSwitchCity = (Button) findViewById(R.id.switch_city);
+        mRefreshWeather = (Button) findViewById(R.id.refresh_weather);
+
+        mSwitchCity.setOnClickListener(this);
+        mRefreshWeather.setOnClickListener(this);
+
         // should be started by intent with county_code from ChooseAreaActivity
         String countyCode = getIntent().getStringExtra("county_code");
 
@@ -132,6 +161,23 @@ public class WeatherActivity extends Activity implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
-
+        switch (v.getId()) {
+            case R.id.switch_city:
+                Intent intent = new Intent(this, ChooseAreaActivity.class);
+                intent.putExtra("from_weather_activity", true);
+                startActivity(intent);
+                finish();
+                break;
+            case R.id.refresh_weather:
+                mPublishText.setText("synchronizing...");
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                String weatherCode = sharedPreferences.getString("weather_code", "");
+                if (!TextUtils.isEmpty(weatherCode)) {
+                    queryWeatherInfo(weatherCode);
+                }
+                break;
+            default:
+                break;
+        }
     }
 }
