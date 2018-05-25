@@ -15,6 +15,11 @@ import java.net.URL;
  */
 public class HttpUtils {
 
+    /**
+     * send a HttpRequest in an asynchronous way
+     * @param address
+     * @param listener
+     */
     public static void sendHttpRequest(final String address, final HttpCallbackListener listener) {
         new Thread(new Runnable() {
             @Override
@@ -35,6 +40,7 @@ public class HttpUtils {
                     while ((line = reader.readLine()) != null) {
                         response.append(line);
                     }
+
                     if (listener != null) {
                         listener.onFinish(response.toString());
                     }

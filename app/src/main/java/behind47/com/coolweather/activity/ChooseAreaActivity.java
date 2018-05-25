@@ -63,6 +63,9 @@ public class ChooseAreaActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // set view structure
+        closeProgressDialog();
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.choose_area);
         mListView = (ListView) findViewById(R.id.list_view);
@@ -71,6 +74,7 @@ public class ChooseAreaActivity extends Activity {
         mAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mDataList);
         mListView.setAdapter(mAdapter);
 
+        // obtain and set data in view structure
         mCoolWeatherDB = CoolWeatherDB.getInstance(this);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -102,6 +106,8 @@ public class ChooseAreaActivity extends Activity {
             mListView.setSelection(0);
             mTitleText.setText("China");
             mCurrentLevel = LEVEL_PROVINCE;
+        } else {
+            queryFromServer(null, "province");
         }
     }
 
@@ -124,7 +130,6 @@ public class ChooseAreaActivity extends Activity {
         }
     }
 
-
     /**
      * query all counties, first from database, then from network
      */
@@ -145,9 +150,9 @@ public class ChooseAreaActivity extends Activity {
     }
 
     /**
-     * query data from servce with type
-     * @param code
-     * @param type
+     * query data from server with type
+     * @param code  null, province_code, city_code
+     * @param type  province, city, county
      */
     private void queryFromServer(final String code, final String type) {
         String address;
@@ -163,6 +168,7 @@ public class ChooseAreaActivity extends Activity {
             @Override
             public void onFinish(String response) {
                 boolean result = false;
+                // resolve data from HttpResponse and save to local database
                 if ("province".equals(type)) {
                     result = Utility.handleProvincesResponse(mCoolWeatherDB, response);
                 } else if ("city".endsWith(type)) {
@@ -171,6 +177,7 @@ public class ChooseAreaActivity extends Activity {
                     result = Utility.handleCountiesResponse(mCoolWeatherDB, response, mSelectedCity.getId());
                 }
 
+                // load data from database and update view with them
                 if (result) {
                     runOnUiThread(new Runnable() {
                         @Override
@@ -225,5 +232,11 @@ public class ChooseAreaActivity extends Activity {
         } else {
             finish();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        closeProgressDialog();
     }
 }

@@ -81,7 +81,7 @@ public class Utility {
     }
 
     /**
-     * resolve county data from response
+     * resolve county data from response and save them to local
      *
      * data form "code|name,code|name,..."
      *
